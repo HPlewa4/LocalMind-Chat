@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "pdfjs-dist": "^5.4.149",
+    "react-router-dom": "^7.6.3",
+    "tailwind-scrollbar": "^4.0.2",
+    "tailwind-scrollbar-hide": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react-router-dom": "^5.3.3"
+  }
+}
