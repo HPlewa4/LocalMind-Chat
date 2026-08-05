@@ -11,7 +11,6 @@ A privacy-focused, full-stack chat application for talking to a locally hosted l
 - Generate short chat titles from the first message
 - Responsive, collapsible conversation sidebar
 - Toast notifications for user feedback
-- PDF export interface (backend endpoint still needs to be implemented)
 
 ## Tech stack
 
@@ -124,7 +123,6 @@ Interactive backend documentation is available at [http://localhost:8000/docs](h
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
 | `POST` | `/chat` | Send a message and stream the model response |
-| `POST` | `/chat-simple` | Send a message without token-by-token streaming |
 | `POST` | `/chat/name` | Generate and save a title for a conversation |
 | `GET` | `/chat/sessions` | List chat sessions |
 | `POST` | `/chat/sessions` | Create a chat session |
@@ -156,7 +154,6 @@ Interactive backend documentation is available at [http://localhost:8000/docs](h
 ## Known limitations
 
 - API URLs, ports, the Ollama model, and the allowed CORS origin are currently hard-coded for local development.
-- The PDF export button calls `/export-pdf/{session_id}`, but that endpoint is not implemented in the backend yet.
 - The application does not currently include authentication, automated tests, or deployment configuration.
 
 ## License

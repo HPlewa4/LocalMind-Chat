@@ -4,7 +4,6 @@ import { Session } from '../../types/AiChat';
 import { loadSessions, loadMessages } from '../../services/AiApiCalls';
 import { generateId, getTimestamp } from '../../utils/AiChatHelpers';
 import { ChatSidebarProps } from '../../types/AiChat';
-import ExportPdfButton from './ExportPdfButton';
 import ChatSearch from './ChatSearch';
 import { timeAgo } from '../../utils/AiChatHelpers';
 
@@ -23,8 +22,6 @@ export default function ChatSidebar({
   setEditTitle,
   switchSession,
   setMessages,
-  messages,
-  getSessionTitle,
 }: ChatSidebarProps) {
   
   const [filteredSessions, setFilteredSessions] = useState<Session[]>(sessions);
@@ -164,7 +161,7 @@ const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
         </div>
 
         {/* Sessions List */}
-        <div className="flex-1 p-2 overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600 scrollbar-thumb-rounded-lg">
+        <div className="flex-1 p-2 overflow-y-auto">
           {filteredSessions.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
               {sessions.length === 0 ? "No sessions yet" : "No matching chats found"}
@@ -200,12 +197,6 @@ const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
                           >
                             <Edit3 size={14} />
                           </button>
-                          <ExportPdfButton
-                            currentSessionId={session.session_id}
-                            currentSessionTitle={currentSessionTitle}
-                            sessions={sessions}
-                          />
-
                           <button
                             onClick={(e) => deleteSession(session.session_id, e)}
                             className="text-gray-400 hover:text-red-400 p-1 rounded"

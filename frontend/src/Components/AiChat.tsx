@@ -119,12 +119,13 @@ export default function AiChat() {
 
         const chunk = decoder.decode(value);
         accumulatedResponse += chunk;
+        const currentResponse = accumulatedResponse;
                    
         // Update the assistant message in place
         setMessages((prev) =>
-           prev.map((msg, index) =>
-             index === prev.length - 1 && msg.role === "assistant"
-              ? { ...msg, content: accumulatedResponse }
+           prev.map((msg) =>
+             msg.message_id === assistantMessage.message_id
+              ? { ...msg, content: currentResponse }
               : msg
           )
         );
@@ -154,18 +155,6 @@ export default function AiChat() {
 
   const switchSession = (sessionId: string) => {
     setCurrentSessionId(sessionId);
-    getSessionTitle();
-    loadMessages(currentSessionId,setMessages);
-  };
-
-  const getSessionTitle = async () => {
-    await loadSessions(setSessions);
-    setTimeout(() => {
-      const session = sessions.find((item) => item.session_id === currentSessionId);
-      if (session) {
-        setCurrentSessionTitle(session.title || "Untitled Chat");
-      }
-    }, 100);
   };
 
   useEffect(() => {
@@ -175,9 +164,15 @@ export default function AiChat() {
   useEffect(() => {
     if (currentSessionId) {
       loadMessages(currentSessionId,setMessages);
-      getSessionTitle();
     }
   }, [currentSessionId]);
+
+  useEffect(() => {
+    const session = sessions.find((item) => item.session_id === currentSessionId);
+    if (session) {
+      setCurrentSessionTitle(session.title || "Untitled Chat");
+    }
+  }, [currentSessionId, sessions]);
 
   return (
     <div className="h-[100vh] max-h-[100vh] flex bg-black text-white">
@@ -185,7 +180,6 @@ export default function AiChat() {
         sidebarCollapsed={sidebarCollapsed}
         setSidebarCollapsed={setSidebarCollapsed}
         sessions={sessions}
-        messages={messages}
         setSessions={setSessions}
         currentSessionId={currentSessionId}
         setCurrentSessionId={setCurrentSessionId}
@@ -197,7 +191,6 @@ export default function AiChat() {
         setEditTitle={setEditTitle}
         switchSession={switchSession}
         setMessages={setMessages}
-        getSessionTitle={getSessionTitle}
       />
 
       {/* Main Chat Area */}
@@ -225,7 +218,7 @@ export default function AiChat() {
         </div>
 
         {/* Messages History */}
-        <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600 scrollbar-thumb-rounded-lg p-4">
+        <div className="h-full overflow-y-auto p-4">
           {messages.length === 0 ? (
             <div className="text-center text-gray-400 py-8">
               No messages yet. Start a conversation!
@@ -250,7 +243,7 @@ export default function AiChat() {
                     </span>
                   </div>
                   <div className="break-words overflow-wrap-anywhere whitespace-pre-wrap">
-                    {(msg.content.length === 0 && msg.role == "assistant" && index === messages.length - 1) ? "Thinking..." : msg.content}
+                    {(msg.content.length === 0 && msg.role === "assistant" && index === messages.length - 1) ? "Thinking..." : msg.content}
                   </div>
                 </div>
               ))}

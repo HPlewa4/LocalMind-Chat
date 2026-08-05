@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.chat import ChatMessage, ChatResponse, ChatSession, ChatMessageDB, SessionUpdate
+from models.chat import ChatSession, SessionUpdate
 from database import chat_sessions_collection, chat_messages_collection
 router = APIRouter()
 
@@ -35,8 +35,6 @@ async def get_sessions():
         session["_id"] = str(session["_id"])
         sessions.append(session)
     return {"sessions": sessions}
-from fastapi import HTTPException
-
 @router.put("/chat/sessions/{session_id}")
 async def update_session(session_id: str, update_data: SessionUpdate):
     """Update a chat session's title and/or timestamp"""

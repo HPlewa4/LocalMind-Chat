@@ -26,7 +26,6 @@ export interface ChatSidebarProps {
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
   sessions: Session[];
-  messages: Messages[];
   setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
   currentSessionId: string;
   setCurrentSessionId: (sessionId: string) => void;
@@ -38,13 +37,6 @@ export interface ChatSidebarProps {
   setEditTitle: (title: string) => void;
   switchSession: (sessionId: string) => void;
   setMessages: React.Dispatch<React.SetStateAction<any[]>>;
-  getSessionTitle: () => void;
-}
-
-export interface ExportPdfButtonProps {
-  currentSessionId: string;
-  currentSessionTitle: string;
-  sessions: Session[];
 }
 
 export interface ChatSearchProps {

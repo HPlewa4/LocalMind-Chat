@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.ai_chat_routes import router as aichat_router
 from routes.messages_sessions_routes import router as messages_router
 
-app = FastAPI(title="Your advanced multifunctional APP", version="1.0.0")
+app = FastAPI(title="LocalMind Chat", version="1.0.0")
 
 origins = ["http://localhost:3000"]
 
