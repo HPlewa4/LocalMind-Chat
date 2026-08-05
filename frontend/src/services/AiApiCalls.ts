@@ -2,13 +2,15 @@ import { Messages, Session } from "../types/AiChat";
 import { ToastFunctions } from "../types/ToastUsageTypes";
 import { getTimestamp } from "../utils/AiChatHelpers";
 
+export const API_URL = (process.env.REACT_APP_API_URL || "http://localhost:8000").replace(/\/$/, "");
+
 export const nameChat = async (
   questionText: string, 
   currentSessionId: string,
   toastFunctions: ToastFunctions
 ) => {
   try {
-    const res = await fetch("http://localhost:8000/chat/name", {
+    const res = await fetch(`${API_URL}/chat/name`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -38,7 +40,7 @@ export const loadMessages = async (
   toastFunctions?: ToastFunctions
 ) => {
   try {
-    const res = await fetch(`http://localhost:8000/chat/session/${currentSessionId}/messages`);
+    const res = await fetch(`${API_URL}/chat/session/${currentSessionId}/messages`);
     const data = await res.json();
     setMessages(data.messages);
   } catch (error) {
@@ -53,7 +55,7 @@ export const loadSessions = async (
   toastFunctions?: ToastFunctions
 ) => {
   try {
-    const res = await fetch("http://localhost:8000/chat/sessions");
+    const res = await fetch(`${API_URL}/chat/sessions`);
     const data = await res.json();
     setSessions(data.sessions);
   } catch (error) {
@@ -69,7 +71,7 @@ export const changeTimestamp = async (
   toastFunctions?: ToastFunctions
 ) => {
   try {
-    const res = await fetch(`http://localhost:8000/chat/sessions/${sessionId}`, {
+    const res = await fetch(`${API_URL}/chat/sessions/${sessionId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ timestamp: getTimestamp() }),

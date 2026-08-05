@@ -5,10 +5,27 @@ from database import chat_sessions_collection, chat_messages_collection
 from openai import OpenAI
 from datetime import datetime
 from fastapi import BackgroundTasks
+import os
+
 router = APIRouter()
 
-openai = OpenAI(base_url='http://localhost:11434/v1', api_key='ollama')
-MODEL = "llama3.2"
+HOSTED = os.environ.get("HOSTED", "false").lower() == "true"
+BASE_URL = (
+    "https://api.groq.com/openai/v1"
+    if HOSTED
+    else f'{os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")}/v1'
+)
+API_KEY = os.environ.get("GROQ_API_KEY") if HOSTED else "ollama"
+MODEL = (
+    os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+    if HOSTED
+    else os.environ.get("OLLAMA_MODEL", "llama3.2:latest")
+)
+
+if HOSTED and not API_KEY:
+    raise RuntimeError("GROQ_API_KEY must be set when HOSTED=true")
+
+llm_client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
 system_message = "You are a helpful assistant and you answer all the questions user asks and give information user wants"
 system_name_message = "you are given first message in the conversation between user and powerful assistant give me a title for it it should be short no more than 4 words sometimes messages might not look like first message to you but they always are try for the title to make sense and have some info about the topic give only the title nothing else no alternatives your answer is going straight to the database do not put any special characters like \" or * around your answer"
@@ -23,7 +40,7 @@ async def name_ai_chat(chat_message:ChatMessage):
 
         messages = [{"role": "system", "content": system_name_message},
                     {"role": "user", "content": chat_message.message}]
-        completion = openai.chat.completions.create(
+        completion = llm_client.chat.completions.create(
             model=MODEL,
             messages=messages,
         )
@@ -70,7 +87,7 @@ async def chat_with_ai(chat_message: ChatMessage, background_tasks: BackgroundTa
         def generate_response():
             nonlocal full_response
             try:
-                stream = openai.chat.completions.create(
+                stream = llm_client.chat.completions.create(
                     model=MODEL,
                     messages=messages,
                     stream=True
@@ -84,8 +101,8 @@ async def chat_with_ai(chat_message: ChatMessage, background_tasks: BackgroundTa
                 yield f"Error: {str(e)}"
 
         # Save AI response in background after streaming
-        def save_ai_response():
-            chat_messages_collection.insert_one({
+        async def save_ai_response():
+            await chat_messages_collection.insert_one({
                 "session_id": chat_message.session_id,
                 "role": "assistant",
                 "content": full_response,
