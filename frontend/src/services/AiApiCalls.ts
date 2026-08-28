@@ -1,6 +1,7 @@
 import { Messages, Session } from "../types/AiChat";
 import { ToastFunctions } from "../types/ToastUsageTypes";
 import { getTimestamp } from "../utils/AiChatHelpers";
+import { apiFetch } from "./browserIdentity";
 
 export const API_URL = (process.env.REACT_APP_API_URL || "http://localhost:8000").replace(/\/$/, "");
 
@@ -10,7 +11,7 @@ export const nameChat = async (
   toastFunctions: ToastFunctions
 ) => {
   try {
-    const res = await fetch(`${API_URL}/chat/name`, {
+    const res = await apiFetch(`${API_URL}/chat/name`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -40,9 +41,12 @@ export const loadMessages = async (
   toastFunctions?: ToastFunctions
 ) => {
   try {
-    const res = await fetch(`${API_URL}/chat/session/${currentSessionId}/messages`);
+    const res = await apiFetch(`${API_URL}/chat/session/${currentSessionId}/messages`);
+    if (!res.ok) {
+      throw new Error(`Failed to load messages (${res.status})`);
+    }
     const data = await res.json();
-    setMessages(data.messages);
+    setMessages(Array.isArray(data.messages) ? data.messages : []);
   } catch (error) {
     console.error("Failed to load messages:", error);
     toastFunctions?.showError("Failed to load messages");
@@ -55,9 +59,12 @@ export const loadSessions = async (
   toastFunctions?: ToastFunctions
 ) => {
   try {
-    const res = await fetch(`${API_URL}/chat/sessions`);
+    const res = await apiFetch(`${API_URL}/chat/sessions`);
+    if (!res.ok) {
+      throw new Error(`Failed to load chat sessions (${res.status})`);
+    }
     const data = await res.json();
-    setSessions(data.sessions);
+    setSessions(Array.isArray(data.sessions) ? data.sessions : []);
   } catch (error) {
     console.error("Failed to load sessions:", error);
     toastFunctions?.showError("Failed to load chat sessions");
@@ -71,7 +78,7 @@ export const changeTimestamp = async (
   toastFunctions?: ToastFunctions
 ) => {
   try {
-    const res = await fetch(`${API_URL}/chat/sessions/${sessionId}`, {
+    const res = await apiFetch(`${API_URL}/chat/sessions/${sessionId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ timestamp: getTimestamp() }),

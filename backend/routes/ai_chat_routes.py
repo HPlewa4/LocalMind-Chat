@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import StreamingResponse
 from models.chat import ChatMessage
 from database import chat_sessions_collection, chat_messages_collection
@@ -32,10 +32,10 @@ system_name_message = "you are given first message in the conversation between u
 
 
 @router.post("/chat/name")
-async def name_ai_chat(chat_message:ChatMessage):
+async def name_ai_chat(chat_message: ChatMessage, owner_id: str = Header(..., alias="X-Chat-Browser-Id")):
     try:
         messages_cursor = chat_messages_collection.find(
-            {"session_id": chat_message.session_id}
+            {"session_id": chat_message.session_id, "owner_id": owner_id}
         ).sort("timestamp", 1)
 
         messages = [{"role": "system", "content": system_name_message},
@@ -47,6 +47,7 @@ async def name_ai_chat(chat_message:ChatMessage):
         response = completion.choices[0].message.content
         await chat_sessions_collection.update_one(
             {"session_id": chat_message.session_id,
+             "owner_id": owner_id,
              "ai_named": False 
              },
             {"$set": 
@@ -60,11 +61,18 @@ async def name_ai_chat(chat_message:ChatMessage):
         raise HTTPException(status_code=500, detail=f"AI chat error: {str(e)}")
 
 @router.post("/chat")
-async def chat_with_ai(chat_message: ChatMessage, background_tasks: BackgroundTasks):
+async def chat_with_ai(chat_message: ChatMessage, background_tasks: BackgroundTasks, owner_id: str = Header(..., alias="X-Chat-Browser-Id")):
     try:
+        session = await chat_sessions_collection.find_one({
+            "session_id": chat_message.session_id,
+            "owner_id": owner_id,
+        })
+        if not session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+
         # Load conversation history
         messages_cursor = chat_messages_collection.find(
-            {"session_id": chat_message.session_id}
+            {"session_id": chat_message.session_id, "owner_id": owner_id}
         ).sort("timestamp", 1)
 
         messages = [{"role": "system", "content": system_message}]
@@ -77,6 +85,7 @@ async def chat_with_ai(chat_message: ChatMessage, background_tasks: BackgroundTa
         # Save user message
         await chat_messages_collection.insert_one({
             "session_id": chat_message.session_id,
+            "owner_id": owner_id,
             "role": "user",
             "content": chat_message.message,
             "timestamp": datetime.now()
@@ -104,6 +113,7 @@ async def chat_with_ai(chat_message: ChatMessage, background_tasks: BackgroundTa
         async def save_ai_response():
             await chat_messages_collection.insert_one({
                 "session_id": chat_message.session_id,
+                "owner_id": owner_id,
                 "role": "assistant",
                 "content": full_response,
                 "timestamp": datetime.now()

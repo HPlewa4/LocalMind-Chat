@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /backend
+cd ./backend
 source venv/bin/activate
 uvicorn main:app --reload

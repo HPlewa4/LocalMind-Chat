@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Trash2, Edit3, Save, X, ChevronLeft } from 'lucide-react';
 import { Session } from '../../types/AiChat';
 import { API_URL, loadSessions, loadMessages } from '../../services/AiApiCalls';
+import { apiFetch } from '../../services/browserIdentity';
 import { generateId, getTimestamp } from '../../utils/AiChatHelpers';
 import { ChatSidebarProps } from '../../types/AiChat';
 import ChatSearch from './ChatSearch';
@@ -35,7 +36,7 @@ const createNewSession = async () => {
   const newTitle = `New Chat`;
   
   try {
-    await fetch(`${API_URL}/chat/sessions`, {
+    await apiFetch(`${API_URL}/chat/sessions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -59,7 +60,7 @@ const createNewSession = async () => {
 const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
   e.stopPropagation();
   try {
-    await fetch(`${API_URL}/chat/sessions/${sessionId}`, {
+    await apiFetch(`${API_URL}/chat/sessions/${sessionId}`, {
       method: "DELETE",
     });
     
@@ -97,7 +98,7 @@ const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
         setCurrentSessionTitle(editTitle);
       }
 
-      const res = await fetch(`${API_URL}/chat/sessions/${sessionId}`, {
+      const res = await apiFetch(`${API_URL}/chat/sessions/${sessionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: editTitle, timestamp: getTimestamp() }),

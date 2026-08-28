@@ -7,7 +7,7 @@ A privacy-focused, full-stack chat application for talking to a locally hosted l
 - Stream AI responses as they are generated
 - Run inference locally through Ollama
 - Create, rename, search, and delete chat sessions
-- Preserve conversation history in MongoDB
+- Preserve conversation history in MongoDB, isolated to each browser with a local anonymous ID
 - Generate short chat titles from the first message
 - Responsive, collapsible conversation sidebar
 - Toast notifications for user feedback
