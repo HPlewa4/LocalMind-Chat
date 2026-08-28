@@ -5,6 +5,7 @@ import { useAutoScroll } from '../hooks/useAutoScroll';
 import { Messages, Session } from '../types/AiChat';
 import { generateId, getTimestamp } from '../utils/AiChatHelpers';
 import { API_URL, nameChat, loadSessions, loadMessages, changeTimestamp } from '../services/AiApiCalls';
+import { apiFetch } from '../services/browserIdentity';
 import ChatInput from './AiChat/ChatInput';
 import ChatSidebar from './AiChat/ChatSidebar';
 import { useToast } from '../contexts/ToastContext';
@@ -43,7 +44,7 @@ export default function AiChat() {
     const newSessionId = generateId();
     const newTitle = `New Chat ${newSessionId}`;
     try {
-      await fetch(`${API_URL}/chat/sessions`, {
+      await apiFetch(`${API_URL}/chat/sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -83,7 +84,7 @@ export default function AiChat() {
   setMessages((prev) => [...prev, userMessage]);
 
   try {
-    const res = await fetch(`${API_URL}/chat`, {
+    const res = await apiFetch(`${API_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
