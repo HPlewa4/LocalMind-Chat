@@ -11,7 +11,10 @@ app = FastAPI(title="LocalMind Chat", version="1.0.0")
 
 origins = [
     origin.strip().rstrip("/")
-    for origin in os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000").split(",")
+    for origin in os.environ.get(
+        "FRONTEND_ORIGIN",
+        "http://localhost:3000,https://local-mind-chat.vercel.app",
+    ).split(",")
     if origin.strip()
 ]
 
